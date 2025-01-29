@@ -1,0 +1,312 @@
+import { useEffect, useState } from "react";
+import { ethers, Wallet } from "ethers";
+import CountdownSm from './CountdownSm';
+import { checkBalance, checkAvaliable,registerWallet,buyTokens } from "../services/api";
+
+
+interface Props {
+  expired: Date;
+}
+
+const Component: React.FC<Props> = ({ expired }: Props) => {
+  const [tsh, setTsh] = useState(0);
+  let collected = 0;
+  const total = 150000;
+  let percentage = (collected / total) * 100;
+  const [pernow, setPernow] = useState<number>(Number); // Almacenar porcentaje
+  const boughtTSH = 10;
+  const [amountPos, SetAmountPos] = useState<number>(); // Almacenar el total de tokens por fase
+  const [usdtBalance, setUsdtBalance] = useState<number | null>(null); // Almacenar el saldo de USDT
+  const[maticBalance, setMaticBalance] = useState<number | null>(null); // Almacenar el saldo de MATIC
+  const [amountToBuy, setAmountToBuy] = useState<number>(0); // Cantidad que el usuario quiere comprar
+  const usdtDecimals = 6; // USDT tiene 6 decimales en la mayoría de las redes
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [balanceInfo, setBalanceInfo] = useState(null); // Estado para almacenar el resultado de la API
+  const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
+  const [error, setError] = useState(null); // Estado para manejar errores
+  let accounts: string;
+let register: string;
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = Number(e.target.value);
+
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await checkBalance(inputValue);
+      const calculatedTsh = Number(result.valores.precioTotal.toFixed(6));
+      setTsh(calculatedTsh);
+      setBalanceInfo(result);
+      setAmountToBuy(inputValue);
+    } catch (err) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    checkAvaliable().then((res) => {
+      collected = res.cantidadDisponible.tokensDisponibles;
+      percentage = ((collected / total) * 100);
+      const calculatedPernow = parseFloat((100 - percentage).toFixed(2));
+      setPernow(calculatedPernow); 
+
+      SetAmountPos(parseFloat(Number(res.cantidadDisponible.precioactual).toFixed(2)));
+    });
+  }, []);
+  useEffect(() => {
+    if (!window.ethereum) {
+      alert("Por favor instala Metamask para usar esta dApp");
+    }
+  }, []);
+  useEffect(() => {
+    getUsdtBalance();
+    console.log("abi", import.meta.env.VITE_CONTRACT_ABI);
+
+  }, [walletAddress]);
+  const connectWallet = async () => {
+    try {
+      // Solicita acceso a la wallet
+      accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      setWalletAddress(accounts[0]);
+      register = await registerWallet(accounts[0]);
+      console.log("walletresgiter", register);
+      console.log("wallet", accounts);
+      
+      getUsdtBalance(); 
+    } catch (error) {
+      console.error("Error conectando la wallet:", error);
+    }
+  };
+
+  const getcontractUsdt = async () => {
+    const usdtAddress: string = import.meta.env.VITE_USDT_ADDRESS;
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const abiUsdt = JSON.parse(import.meta.env.VITE_ABI_USDT);
+    const signer = await provider.getSigner();
+    const getcontractUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer)
+    return getcontractUsdt;
+  };
+  const getUsdtBalance = async () => {
+    
+      console.log("datos de respuesta del balance de la wallet conectada", walletAddress);
+      getcontractUsdt().then(res => {
+        res.balanceOf(walletAddress).then(balance => {
+          console.log("datos ", balance);
+          setUsdtBalance(balance); 
+          getMaticBalance();
+        }).catch(err => {
+          console.error("Error obteniendo balance: ", err);
+        });
+      }).catch(err => {
+        console.error("Error obteniendo contrato: ", err);
+      });
+    };
+   
+  
+  const getMaticBalance = async () => {
+    try {
+      if (usdtBalance==null) {
+      const apiKey = import.meta.env.VITE_POLYGONSCAN_API_KEY; // Carga la API key del archivo .env
+      const url = `https://api.polygonscan.com/api?module=account&action=balance&address=${walletAddress}&apikey=${apiKey}`;
+  
+      const response = await fetch(url);
+      const data = await response.json();
+  
+      if (data.status === "1") {
+        const balanceWei = data.result;
+        const balanceMatic = balanceWei / 1e18;
+        console.log("Balance de MATIC:", balanceMatic);
+        setMaticBalance(balanceMatic);
+        return balanceMatic;
+      } else {
+        console.error("Error en la respuesta de Polygonscan:", data.message);
+      }}
+    } catch (error) {
+      console.error("Error al consultar balance en Polygonscan:", error);
+    }
+  };
+
+  const approveTokenFrontend = async () => {
+   const usdtAddress = import.meta.env.VITE_USDT_ADDRESS;
+   const abiUsdt = JSON.parse(import.meta.env.VITE_ABI_USDT);
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []); // Pide permiso al usuario
+    const signer = await provider.getSigner();
+    const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+    const abiContract = JSON.parse(import.meta.env.VITE_CONTRACT_ABI);
+  const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
+    const contract = new ethers.Contract(contractAddress, abiContract, signer);
+
+// Example: Call a function `name` of the contract
+
+    console.log("contract", contract);
+    const amountToApprove = (tsh * 1e6)+1; // Monto a aprobar en wei (USDT usa 6 decimales)
+    console.log("amountToApprove", amountToApprove);
+    const params = {
+      cantidadTokens: amountToBuy,
+      wallet: walletAddress,
+    }
+    try {
+      // Paso 1: Aprobar tokens
+      console.log("Iniciando la aprobación de tokens...");
+      const txApprove = await tokenUsdt.approve(contractAddress, amountToApprove);
+      console.log("Transacción enviada para approve:", txApprove.hash);
+  
+      // Esperar la confirmación de la transacción de aprobación
+      const receiptApprove = await txApprove.wait();
+      console.log("Transacción confirmada para approve:", receiptApprove);
+  
+      // Paso 2: Realizar la compra para obtener los datos de payments
+      console.log("Realizando la compra...");
+      const compra = await buyTokens(params); // los datos calculo
+      const payments = compra.costo;
+  
+      // Paso 3: Distribuir USDT
+      console.log("Distribuyendo USDT...");
+     const txDistribute = await contract.distributeUSDT(payments);
+     console.log("Transacción enviada para distributeUSDT:", txDistribute.hash);
+  
+      // Esperar la confirmación de la transacción de distribución
+      const receiptDistribute = await txDistribute.wait();
+      console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
+    } catch (error) {
+      console.error("Error en el flujo de ejecución:", error);
+    }
+  };
+  
+
+
+
+  return (
+    <>
+      <section id="presale" className="container mx-auto sm:z-10 block py-7  lg:p-16 relative">
+        <div className="grid gap-9">
+
+          <div className="grid text-center">
+            <h2 className="text-center color-main font-protest text-4xl lg:text-7xl">TRAISHUNT</h2>
+            <span className="font-light  text-xl lg:text-3xl text-white">Preventa</span>
+          </div>
+          <div className="flex w-full justify-center">
+            <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
+              <div className="grid">
+                <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE 1</span>
+                <span className="text-base lg:text-lg text-white font-light">Primera fase de compra</span>
+              </div>
+              <CountdownSm expired={expired} />
+              <div className="flex justify-center w-full text-white gap-2 text-xl"><span>{collected} <small>TSH</small></span> / <span> {total} <small>TSH</small></span></div>
+              <div className="">
+                <span id="ProgressLabel" className="sr-only">Loading</span>
+                <span
+                  role="progressbar"
+                  aria-labelledby="ProgressLabel"
+                  aria-valuenow={percentage}
+                  className="relative block rounded-full bg-[#060C18]"
+                >
+                  <span className="absolute inset-0 flex items-center justify-center text-[10px]/4">
+                    <span className="text-white">Fase 1 <span className="text-sm ms-1">{Math.round(pernow)}%</span></span>
+                  </span>
+                  <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400 text-center" style={{ width: `${percentage}%` }}> </span>
+                </span>
+              </div>
+              <div className="flex justify-center w-full text-white gap-2 text-xl"><span>1 TSH</span> = <span>{amountPos}USD</span></div>
+              <div className="flex justify-center w-full">
+                <form className="grid grid-cols-2 w-fit gap-4 lg:gap-7 group relative overflow-hidden rounded-2xl p-3 sm:p-4 sm:px-11 text-white bg-[#060C18] transition-all">
+                  <div className="color-main">MIS FONDOS</div>
+                  <div className="font-semibold text-3xl lg:text-5xl">{boughtTSH} <small>TSH</small></div>
+                  <div className="grid">
+                    <span className="text-xs lg:text-base">Comprar TSH</span>
+                    <input
+                      type="number"
+                      name="usd"
+                      min={0}
+                      defaultValue={0}
+                      className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="grid">
+                    <span className="text-xs lg:text-base">Precio en USDT</span>
+                    <span className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44">{tsh}</span>
+                  </div>
+                  <div className="col-span-2 flex justify-center w-full">
+                    {!walletAddress ? (
+                      <a
+                        className="text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold hover:bg-black hover:text-teal-400 transition-all cursor-pointer"
+                        onClick={connectWallet}
+                      >
+                        CONECTAR WALLET
+                      </a>
+                    ) : (
+                      <p className="text-lg text-center">
+                        Wallet conectada
+                        <a className="text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold hover:bg-black hover:text-teal-400 transition-all cursor-pointer" onClick={approveTokenFrontend}  >Comprar tsh </a>
+                      </p>
+                    )}
+                  </div>
+                  <div className="col-span-2 flex justify-center w-full">
+                    <span className="font-light color-main text-xs">Comisión de sistema 10%</span>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div className="flex w-full justify-center">
+            <div className="grid lg:grid-cols-2 gap-9">
+              <div className="flex w-full justify-center opacity-60 hover:opacity-100 transition-all">
+                <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
+                  <div className="grid">
+                    <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE 2</span>
+                    <span className="text-base lg:text-lg text-white font-light">Segunda fase de compra</span>
+                  </div>
+                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>{0} <small>TSH</small></span> / <span> 350000 <small>TSH</small></span></div>
+                  <div className="">
+                    <span id="ProgressLabel" className="sr-only">Loading</span>
+                    <span
+                      role="progressbar"
+                      aria-labelledby="ProgressLabel"
+                      aria-valuenow={0}
+                      className="relative block rounded-full bg-[#060C18]"
+                    >
+                      <span className="absolute inset-0 flex items-center justify-center text-[10px]/4">
+                        <span className="text-white">Fase 2 <span className="text-sm ms-1">{Math.round(0)}%</span></span>
+                      </span>
+                      <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400 text-center" style={{ width: `${0}%` }}> </span>
+                    </span>
+                  </div>
+                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>1 TSH</span> = <span>0.2 USD</span></div>
+                </div>
+              </div>
+              <div className="flex w-full justify-center opacity-60 hover:opacity-100 transition-all">
+                <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
+                  <div className="grid">
+                    <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE 3</span>
+                    <span className="text-base lg:text-lg text-white font-light">Tercera fase de compra</span>
+                  </div>
+                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>{0} <small>TSH</small></span> / <span> 550000 <small>TSH</small></span></div>
+                  <div className="">
+                    <span id="ProgressLabel" className="sr-only">Loading</span>
+                    <span
+                      role="progressbar"
+                      aria-labelledby="ProgressLabel"
+                      aria-valuenow={0}
+                      className="relative block rounded-full bg-[#060C18]"
+                    >
+                      <span className="absolute inset-0 flex items-center justify-center text-[10px]/4">
+                        <span className="text-white">Fase 3 <span className="text-sm ms-1">{Math.round(0)}%</span></span>
+                      </span>
+                      <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400 text-center" style={{ width: `${0}%` }}> </span>
+                    </span>
+                  </div>
+                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>1 TSH</span> = <span>0.3 USD</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+
+  )
+}
+
+export default Component
