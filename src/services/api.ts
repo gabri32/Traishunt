@@ -14,6 +14,16 @@ export const checkBalance = async (amount:number) => {
     throw error;
   }
 };
+export const verifyref = async (ref:string) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/preventa/verifyref?ref=`+ref);
+  
+    return response.data;
+  } catch (error) {
+    console.error("Error al verificar el saldo:", error);
+    throw error;
+  }
+};
 export const checkAvaliable = async () => {
   try {
     const response = await axios.get(`${API_URL}/api/preventa/disponiblesPorFase`);
@@ -35,9 +45,9 @@ try {
 }
 };
 
-export const registerWallet= async (wallet:string) => {
+export const registerWallet= async (wallet:string,referido:string) => {
   try {
-    const response = await axios.post(`${API_URL}/api/preventa/registro`, { wallet });
+    const response = await axios.post(`${API_URL}/api/preventa/registro`, { wallet,referido });
  
     return response.data.mensaje;
    

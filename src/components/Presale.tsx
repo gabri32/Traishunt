@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import CountdownSm from './CountdownSm';
-import { checkBalance, checkAvaliable, registerWallet, buyTokens } from "../services/api";
+import { checkBalance, checkAvaliable, registerWallet, buyTokens,verifyref } from "../services/api";
 
 
 interface Props {
@@ -23,17 +23,35 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [maticBalance, setMaticBalance] = useState<number | null>(null); // Almacenar el saldo de MATIC
   const [amountToBuy, setAmountToBuy] = useState<number>(0); // Cantidad que el usuario quiere comprar
   const usdtDecimals = 6; // USDT tiene 6 decimales en la mayoría de las redes
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | "">("");
   const [balanceInfo, setBalanceInfo] = useState(null); // Estado para almacenar el resultado de la API
   const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
-  const [error, setError] = useState(null); // Estado para manejar errores
+  const [error, setError] = useState(false); // Estado para manejar errores
   let accounts: string;
+   const [tieneref, setTieneref] = useState(false);
+  const [referido, setReferido] = useState(''); // Variable de estado
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nuevoReferido = e.target.value;
+    setReferido(nuevoReferido);
+    setError(false); // Reiniciar el error al cambiar el input
+
+    try {
+      const response = await verifyref(nuevoReferido);
+      console.log("Datos de respuesta:", response);
+      if (!response.success) {
+        setError(true);
+      }
+    } catch (error) {
+      console.error("Error al verificar el referido:", error);
+      setError(true);
+    }
+  };
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = Number(e.target.value);
 
     try {
       setLoading(true);
-      setError(null);
+   //   setError(null);
       const result = await checkBalance(inputValue);
       const calculatedTsh = Number(result.valores.precioTotal.toFixed(6));
       setTsh(calculatedTsh);
@@ -66,12 +84,18 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
 
   }, [walletAddress]);
   const connectWallet = async () => {
-    try {
-      // Solicita acceso a la wallet
+    try {let nuevoReferido ="";
+
+      error==true?setReferido(nuevoReferido):referido;
       accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       setWalletAddress(accounts[0]);
-     let register = await registerWallet(accounts[0]);
+      let register = await registerWallet(accounts[0], referido);
       buyer(register.tokensComprados);
+      setReferido(register.referido);
+      if (register.referido != '') {
+        setTieneref(true)
+      }
+
       getUsdtBalance();
     } catch (error) {
       console.error("Error conectando la wallet:", error);
@@ -137,7 +161,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
     const abiContract = VITE_CONTRACT_ABI;
     const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
     const contract = new ethers.Contract(contractAddress, abiContract, signer);
-console.log("var",balanceInfo,usdtDecimals,loading)
+    console.log("var", balanceInfo, usdtDecimals, loading)
     const amountToApprove = (tsh * 1e6) + 1;
 
     const params = {
@@ -145,7 +169,7 @@ console.log("var",balanceInfo,usdtDecimals,loading)
       wallet: walletAddress,
     }
     try {
-   
+
       console.log("Balance de MATIC:", maticBalance);
       if (typeof maticBalance === "number" && !isNaN(maticBalance) && maticBalance > 1) {
         console.log("Iniciando la aprobación de tokens...");
@@ -171,7 +195,7 @@ console.log("var",balanceInfo,usdtDecimals,loading)
         console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
 
         alert("Transacción completada con éxito");
-       let register = await registerWallet(accounts[0]);
+        let register = await registerWallet(walletAddress, referido);
         buyer(register.tokensComprados);
       } else {
         alert("No tienes suficiente MATIC para realizar la transacción");
@@ -237,9 +261,25 @@ console.log("var",balanceInfo,usdtDecimals,loading)
                     <span className="text-xs lg:text-base">Precio en USDT</span>
                     <span className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44">{tsh}</span>
                   </div>
+                  {!walletAddress && (
+        <div>
+          <span className="text-xs lg:text-base">Referido:</span>
+          <br />
+          <input
+            type="text"
+            name="referido"
+            className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44"
+            value={referido}
+            onChange={handleChange}
+          />
+          {error && <p className="text-red-500 text-sm mt-1">Código incorrecto</p>}
+        </div>
+      )}
                   <div className="col-span-2 flex justify-center w-full">
                     {!walletAddress ? (
+
                       <a
+
                         className="text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold hover:bg-black hover:text-teal-400 transition-all cursor-pointer"
                         onClick={connectWallet}
                       >
@@ -248,10 +288,12 @@ console.log("var",balanceInfo,usdtDecimals,loading)
                     ) : (
                       <p className="text-lg text-center">
                         Wallet conectada
+                        <br />
+                        <br />
                         <a
                           className={`text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold transition-all cursor-pointer 
                           ${tsh > 0 ? 'hover:bg-black hover:text-teal-400' : 'bg-gray-400 text-gray-600 cursor-not-allowed'}`}
-                          onClick={tsh > 0.5? approveTokenFrontend : undefined}
+                          onClick={tsh > 0.5 ? approveTokenFrontend : undefined}
                         >
                           Comprar tsh
                         </a>
