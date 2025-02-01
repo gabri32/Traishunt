@@ -28,7 +28,6 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
   const [error, setError] = useState(null); // Estado para manejar errores
   let accounts: string;
-  let register: string;
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = Number(e.target.value);
 
@@ -71,7 +70,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
       // Solicita acceso a la wallet
       accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       setWalletAddress(accounts[0]);
-      register = await registerWallet(accounts[0]);
+     let register = await registerWallet(accounts[0]);
       buyer(register.tokensComprados);
       getUsdtBalance();
     } catch (error) {
@@ -138,7 +137,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
     const abiContract = VITE_CONTRACT_ABI;
     const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
     const contract = new ethers.Contract(contractAddress, abiContract, signer);
-
+console.log("var",balanceInfo,usdtDecimals,loading)
     const amountToApprove = (tsh * 1e6) + 1;
 
     const params = {
@@ -172,7 +171,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
         console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
 
         alert("Transacción completada con éxito");
-        register = await registerWallet(accounts[0]);
+       let register = await registerWallet(accounts[0]);
         buyer(register.tokensComprados);
       } else {
         alert("No tienes suficiente MATIC para realizar la transacción");
