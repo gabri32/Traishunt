@@ -55,7 +55,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
       const result = await checkBalance(inputValue);
       const calculatedTsh = Number(result.valores.precioTotal.toFixed(6));
       setTsh(calculatedTsh);
-      console.log(tieneref)
+      console.log(tieneref) 
       setBalanceInfo(result);
       setAmountToBuy(inputValue);
     } catch (err) {
