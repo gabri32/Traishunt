@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import CountdownSm from './CountdownSm';
-import { checkBalance, checkAvaliable,registerWallet,buyTokens } from "../services/api";
+import { checkBalance, checkAvaliable, registerWallet, buyTokens } from "../services/api";
 
 
 interface Props {
@@ -9,18 +9,18 @@ interface Props {
 }
 
 const Component: React.FC<Props> = ({ expired }: Props) => {
-  
-  let VITE_ABI_USDT=[{ "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "userAddress", "type": "address" }, { "indexed": false, "internalType": "address payable", "name": "relayerAddress", "type": "address" }, { "indexed": false, "internalType": "bytes", "name": "functionSignature", "type": "bytes" }], "name": "MetaTransactionExecuted", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "indexed": true, "internalType": "bytes32", "name": "previousAdminRole", "type": "bytes32" }, { "indexed": true, "internalType": "bytes32", "name": "newAdminRole", "type": "bytes32" }], "name": "RoleAdminChanged", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "indexed": true, "internalType": "address", "name": "account", "type": "address" }, { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }], "name": "RoleGranted", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "indexed": true, "internalType": "address", "name": "account", "type": "address" }, { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }], "name": "RoleRevoked", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "inputs": [], "name": "CHILD_CHAIN_ID", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "CHILD_CHAIN_ID_BYTES", "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "DEFAULT_ADMIN_ROLE", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "DEPOSITOR_ROLE", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "ERC712_VERSION", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "ROOT_CHAIN_ID", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "ROOT_CHAIN_ID_BYTES", "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" }], "name": "allowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "string", "name": "name_", "type": "string" }], "name": "changeName", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "subtractedValue", "type": "uint256" }], "name": "decreaseAllowance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }, { "internalType": "bytes", "name": "depositData", "type": "bytes" }], "name": "deposit", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "userAddress", "type": "address" }, { "internalType": "bytes", "name": "functionSignature", "type": "bytes" }, { "internalType": "bytes32", "name": "sigR", "type": "bytes32" }, { "internalType": "bytes32", "name": "sigS", "type": "bytes32" }, { "internalType": "uint8", "name": "sigV", "type": "uint8" }], "name": "executeMetaTransaction", "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "getChainId", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "pure", "type": "function" }, { "inputs": [], "name": "getDomainSeperator", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "getNonce", "outputs": [{ "internalType": "uint256", "name": "nonce", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }], "name": "getRoleAdmin", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "uint256", "name": "index", "type": "uint256" }], "name": "getRoleMember", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }], "name": "getRoleMemberCount", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "grantRole", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "hasRole", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "addedValue", "type": "uint256" }], "name": "increaseAllowance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "string", "name": "name_", "type": "string" }, { "internalType": "string", "name": "symbol_", "type": "string" }, { "internalType": "uint8", "name": "decimals_", "type": "uint8" }, { "internalType": "address", "name": "childChainManager", "type": "address" }], "name": "initialize", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "renounceRole", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "revokeRole", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transfer", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "withdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" }];
-  let VITE_CONTRACT_ABI=[{"inputs":[{"internalType":"address","name":"_usdtToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"components":[{"internalType":"address","name":"wallet","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct USDTManager.Payment[]","name":"payments","type":"tuple[]"}],"name":"distributeUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"usdtToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+
+  let VITE_ABI_USDT = [{ "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "userAddress", "type": "address" }, { "indexed": false, "internalType": "address payable", "name": "relayerAddress", "type": "address" }, { "indexed": false, "internalType": "bytes", "name": "functionSignature", "type": "bytes" }], "name": "MetaTransactionExecuted", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "indexed": true, "internalType": "bytes32", "name": "previousAdminRole", "type": "bytes32" }, { "indexed": true, "internalType": "bytes32", "name": "newAdminRole", "type": "bytes32" }], "name": "RoleAdminChanged", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "indexed": true, "internalType": "address", "name": "account", "type": "address" }, { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }], "name": "RoleGranted", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "indexed": true, "internalType": "address", "name": "account", "type": "address" }, { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }], "name": "RoleRevoked", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "inputs": [], "name": "CHILD_CHAIN_ID", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "CHILD_CHAIN_ID_BYTES", "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "DEFAULT_ADMIN_ROLE", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "DEPOSITOR_ROLE", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "ERC712_VERSION", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "ROOT_CHAIN_ID", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "ROOT_CHAIN_ID_BYTES", "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" }], "name": "allowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "string", "name": "name_", "type": "string" }], "name": "changeName", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "subtractedValue", "type": "uint256" }], "name": "decreaseAllowance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }, { "internalType": "bytes", "name": "depositData", "type": "bytes" }], "name": "deposit", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "userAddress", "type": "address" }, { "internalType": "bytes", "name": "functionSignature", "type": "bytes" }, { "internalType": "bytes32", "name": "sigR", "type": "bytes32" }, { "internalType": "bytes32", "name": "sigS", "type": "bytes32" }, { "internalType": "uint8", "name": "sigV", "type": "uint8" }], "name": "executeMetaTransaction", "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "getChainId", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "pure", "type": "function" }, { "inputs": [], "name": "getDomainSeperator", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "getNonce", "outputs": [{ "internalType": "uint256", "name": "nonce", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }], "name": "getRoleAdmin", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "uint256", "name": "index", "type": "uint256" }], "name": "getRoleMember", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }], "name": "getRoleMemberCount", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "grantRole", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "hasRole", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "addedValue", "type": "uint256" }], "name": "increaseAllowance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "string", "name": "name_", "type": "string" }, { "internalType": "string", "name": "symbol_", "type": "string" }, { "internalType": "uint8", "name": "decimals_", "type": "uint8" }, { "internalType": "address", "name": "childChainManager", "type": "address" }], "name": "initialize", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "renounceRole", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }, { "internalType": "address", "name": "account", "type": "address" }], "name": "revokeRole", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transfer", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "withdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" }];
+  let VITE_CONTRACT_ABI = [{ "inputs": [{ "internalType": "address", "name": "_usdtToken", "type": "address" }], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [{ "components": [{ "internalType": "address", "name": "wallet", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "internalType": "struct USDTManager.Payment[]", "name": "payments", "type": "tuple[]" }], "name": "distributeUSDT", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "usdtToken", "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "withdrawUSDT", "outputs": [], "stateMutability": "nonpayable", "type": "function" }]
   const [tsh, setTsh] = useState(0);
   let collected = 0;
   const total = 150000;
   let percentage = (collected / total) * 100;
   const [pernow, setPernow] = useState<number>(Number); // Almacenar porcentaje
-  const boughtTSH = 10;
+  const [boughtTsh, buyer] = useState<number>(Number);
   const [amountPos, SetAmountPos] = useState<number>(); // Almacenar el total de tokens por fase
   const [usdtBalance, setUsdtBalance] = useState<number | null>(null); // Almacenar el saldo de USDT
-  const[maticBalance, setMaticBalance] = useState<number | null>(null); // Almacenar el saldo de MATIC
+  const [maticBalance, setMaticBalance] = useState<number | null>(null); // Almacenar el saldo de MATIC
   const [amountToBuy, setAmountToBuy] = useState<number>(0); // Cantidad que el usuario quiere comprar
   const usdtDecimals = 6; // USDT tiene 6 decimales en la mayoría de las redes
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -28,7 +28,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
   const [error, setError] = useState(null); // Estado para manejar errores
   let accounts: string;
-let register: string;
+  let register: string;
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = Number(e.target.value);
 
@@ -51,7 +51,7 @@ let register: string;
       collected = res.cantidadDisponible.tokensDisponibles;
       percentage = ((collected / total) * 100);
       const calculatedPernow = parseFloat((100 - percentage).toFixed(2));
-      setPernow(calculatedPernow); 
+      setPernow(calculatedPernow);
 
       SetAmountPos(parseFloat(Number(res.cantidadDisponible.precioactual).toFixed(2)));
     });
@@ -72,10 +72,8 @@ let register: string;
       accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       setWalletAddress(accounts[0]);
       register = await registerWallet(accounts[0]);
-      console.log("walletresgiter", register);
-      console.log("wallet", [0]); 
-      
-      getUsdtBalance(); 
+      buyer(register.tokensComprados);
+      getUsdtBalance();
     } catch (error) {
       console.error("Error conectando la wallet:", error);
     }
@@ -90,94 +88,102 @@ let register: string;
     return getcontractUsdt;
   };
   const getUsdtBalance = async () => {
-    
-      console.log("datos de respuesta del balance de la wallet conectada", walletAddress);
-      getcontractUsdt().then(res => {
-        res.balanceOf(walletAddress).then(balance => {
-          console.log("datos ", balance);
-          setUsdtBalance(balance); 
-          getMaticBalance();
-        }).catch(err => {
-          console.error("Error obteniendo balance: ", err);
-        });
+
+    console.log("datos de respuesta del balance de la wallet conectada", walletAddress);
+    getcontractUsdt().then(res => {
+      res.balanceOf(walletAddress).then(balance => {
+        console.log("datos ", balance);
+        setUsdtBalance(balance);
+        getMaticBalance();
       }).catch(err => {
-        console.error("Error obteniendo contrato: ", err);
+        console.error("Error obteniendo balance: ", err);
       });
-    };
-   
-  
+    }).catch(err => {
+      console.error("Error obteniendo contrato: ", err);
+    });
+  };
+
+
   const getMaticBalance = async () => {
     try {
-      if (usdtBalance==null) {
-      const apiKey = import.meta.env.VITE_POLYGONSCAN_API_KEY; // Carga la API key del archivo .env
-      const url = `https://api.polygonscan.com/api?module=account&action=balance&address=${walletAddress}&apikey=${apiKey}`;
-  
-      const response = await fetch(url);
-      const data = await response.json();
-  
-      if (data.status === "1") {
-        const balanceWei = data.result;
-        const balanceMatic = balanceWei / 1e18;
-        console.log("Balance de MATIC:", maticBalance);
-        console.log("Balance de MATIC en wei:", usdtDecimals,loading,balanceInfo);
-        setMaticBalance(balanceMatic);
-        return balanceMatic;
-      } else {
-        console.error("Error en la respuesta de Polygonscan:", data.message);
-      }}
+      if (usdtBalance == null) {
+        const apiKey = import.meta.env.VITE_POLYGONSCAN_API_KEY; // Carga la API key del archivo .env
+        const url = `https://api.polygonscan.com/api?module=account&action=balance&address=${walletAddress}&apikey=${apiKey}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.status === "1") {
+          const balanceWei = data.result;
+          const balanceMatic = balanceWei / 1e18;
+          console.log("Balance de MATIC en wei:", balanceMatic);
+          setMaticBalance(balanceMatic);
+          return balanceMatic;
+        } else {
+          console.error("Error en la respuesta de Polygonscan:", data.message);
+        }
+      }
     } catch (error) {
       console.error("Error al consultar balance en Polygonscan:", error);
     }
   };
 
   const approveTokenFrontend = async () => {
-   const usdtAddress = import.meta.env.VITE_USDT_ADDRESS;
-   const abiUsdt = VITE_ABI_USDT;
+    const usdtAddress = import.meta.env.VITE_USDT_ADDRESS;
+    const abiUsdt = VITE_ABI_USDT;
     const provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []); // Pide permiso al usuario
     const signer = await provider.getSigner();
     const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
     const abiContract = VITE_CONTRACT_ABI;
-  const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
+    const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
     const contract = new ethers.Contract(contractAddress, abiContract, signer);
 
-// Example: Call a function `name` of the contract
+    const amountToApprove = (tsh * 1e6) + 1;
 
-    console.log("contract", contract);
-    const amountToApprove = (tsh * 1e6)+1; // Monto a aprobar en wei (USDT usa 6 decimales)
-    console.log("amountToApprove", amountToApprove);
     const params = {
       cantidadTokens: amountToBuy,
       wallet: walletAddress,
     }
     try {
+   
+      console.log("Balance de MATIC:", maticBalance);
+      if (typeof maticBalance === "number" && !isNaN(maticBalance) && maticBalance > 1) {
+        console.log("Iniciando la aprobación de tokens...");
+        const txApprove = await tokenUsdt.approve(contractAddress, amountToApprove);
+        console.log("Transacción enviada para approve:", txApprove.hash);
+
+        // Esperar la confirmación de la transacción de aprobación
+        const receiptApprove = await txApprove.wait();
+        console.log("Transacción confirmada para approve:", receiptApprove);
+
+        // Paso 2: Realizar la compra para obtener los datos de payments
+        console.log("Realizando la compra...");
+        const compra = await buyTokens(params); // los datos calculo
+        const payments = compra.costo;
+
+        // Paso 3: Distribuir USDT
+        console.log("Distribuyendo USDT...");
+        const txDistribute = await contract.distributeUSDT(payments);
+        console.log("Transacción enviada para distributeUSDT:", txDistribute.hash);
+
+        // Esperar la confirmación de la transacción de distribución
+        const receiptDistribute = await txDistribute.wait();
+        console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
+
+        alert("Transacción completada con éxito");
+        register = await registerWallet(accounts[0]);
+        buyer(register.tokensComprados);
+      } else {
+        alert("No tienes suficiente MATIC para realizar la transacción");
+      }
       // Paso 1: Aprobar tokens
-      console.log("Iniciando la aprobación de tokens...");
-      const txApprove = await tokenUsdt.approve(contractAddress, amountToApprove);
-      console.log("Transacción enviada para approve:", txApprove.hash);
-  
-      // Esperar la confirmación de la transacción de aprobación
-      const receiptApprove = await txApprove.wait();
-      console.log("Transacción confirmada para approve:", receiptApprove);
-  
-      // Paso 2: Realizar la compra para obtener los datos de payments
-      console.log("Realizando la compra...");
-      const compra = await buyTokens(params); // los datos calculo
-      const payments = compra.costo;
-  
-      // Paso 3: Distribuir USDT
-      console.log("Distribuyendo USDT...");
-     const txDistribute = await contract.distributeUSDT(payments);
-     console.log("Transacción enviada para distributeUSDT:", txDistribute.hash);
-  
-      // Esperar la confirmación de la transacción de distribución
-      const receiptDistribute = await txDistribute.wait();
-      console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
+
     } catch (error) {
       console.error("Error en el flujo de ejecución:", error);
     }
   };
-  
+
 
 
 
@@ -216,14 +222,14 @@ let register: string;
               <div className="flex justify-center w-full">
                 <form className="grid grid-cols-2 w-fit gap-4 lg:gap-7 group relative overflow-hidden rounded-2xl p-3 sm:p-4 sm:px-11 text-white bg-[#060C18] transition-all">
                   <div className="color-main">MIS FONDOS</div>
-                  <div className="font-semibold text-3xl lg:text-5xl">{boughtTSH} <small>TSH</small></div>
+                  <div className="font-semibold text-3xl lg:text-5xl">{boughtTsh} <small>TSH</small></div>
                   <div className="grid">
                     <span className="text-xs lg:text-base">Comprar TSH</span>
                     <input
                       type="number"
                       name="usd"
                       min={0}
-                      defaultValue={0}
+                      defaultValue={80}
                       className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44"
                       onChange={handleInputChange}
                     />
@@ -243,8 +249,15 @@ let register: string;
                     ) : (
                       <p className="text-lg text-center">
                         Wallet conectada
-                        <a className="text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold hover:bg-black hover:text-teal-400 transition-all cursor-pointer" onClick={approveTokenFrontend}  >Comprar tsh </a>
+                        <a
+                          className={`text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold transition-all cursor-pointer 
+                          ${tsh > 0 ? 'hover:bg-black hover:text-teal-400' : 'bg-gray-400 text-gray-600 cursor-not-allowed'}`}
+                          onClick={tsh > 0.5? approveTokenFrontend : undefined}
+                        >
+                          Comprar tsh
+                        </a>
                       </p>
+
                     )}
                   </div>
                   <div className="col-span-2 flex justify-center w-full">

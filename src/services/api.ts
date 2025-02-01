@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API;
 export const checkBalance = async (amount:number) => {
   try {
     const response = await axios.get(`${API_URL}/api/preventa/costotoken?cantidadTokens=`+amount);
-   console.log("datos de respuesta check",response.data);  
+  
     return response.data;
   } catch (error) {
     console.error("Error al verificar el saldo:", error);
@@ -38,7 +38,9 @@ try {
 export const registerWallet= async (wallet:string) => {
   try {
     const response = await axios.post(`${API_URL}/api/preventa/registro`, { wallet });
-    return response.data;
+ 
+    return response.data.mensaje;
+   
   } catch (error) {
     console.error("Error al registrar la wallet:", error);
     throw error;
