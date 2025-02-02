@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import CountdownSm from './CountdownSm';
 import { checkBalance, checkAvaliable, registerWallet, buyTokens,verifyref } from "../services/api";
+import { stringify } from "querystring";
 
 
 interface Props {
@@ -23,7 +24,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [maticBalance, setMaticBalance] = useState<number | null>(null); // Almacenar el saldo de MATIC
   const [amountToBuy, setAmountToBuy] = useState<number>(0); // Cantidad que el usuario quiere comprar
   const usdtDecimals = 6; // USDT tiene 6 decimales en la mayoría de las redes
-  const [walletAddress, setWalletAddress] = useState<string | "">("");
+  const [walletAddress, setWalletAddress] = useState<string>();
   const [balanceInfo, setBalanceInfo] = useState(null); // Estado para almacenar el resultado de la API
   const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
   const [error, setError] = useState(false); // Estado para manejar errores
@@ -80,29 +81,44 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
     }
   }, []);
   useEffect(() => {
-    getUsdtBalance();
-  
+    if (walletAddress) {
+      getUsdtBalance(walletAddress);
+    }
 
-  }, [walletAddress]);
+
+  }, 
+  [walletAddress]);
+
   const connectWallet = async () => {
-    try {let nuevoReferido ="";
-
-      error==true?setReferido(nuevoReferido):referido;
-      accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      setWalletAddress(accounts[0]);
+    try {
+      let nuevoReferido = "";
+      error == true ? setReferido(nuevoReferido) : referido;
+  
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+  
+      if (accounts.length === 0) {
+        throw new Error("No se detectó ninguna cuenta");
+      }
+  
+      setWalletAddress(accounts[0]); // Actualiza el estado, pero esto no es inmediato.
+  
+      console.log("Wallet conectada:", accounts);
+  
       let register = await registerWallet(accounts[0], referido);
       buyer(register.tokensComprados);
       setReferido(register.referido);
+  
       if (register.referido != '') {
-        setTieneref(true)
+        setTieneref(true);
       }
-
-      getUsdtBalance();
+  
+      
+  
     } catch (error) {
       console.error("Error conectando la wallet:", error);
     }
   };
-
+  
   const getcontractUsdt = async () => {
     const usdtAddress: string = import.meta.env.VITE_USDT_ADDRESS;
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -111,46 +127,64 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
     const getcontractUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer)
     return getcontractUsdt;
   };
-  const getUsdtBalance = async () => {
-
-    console.log("datos de respuesta del balance de la wallet conectada", walletAddress);
-    getcontractUsdt().then(res => {
-      res.balanceOf(walletAddress).then(balance => {
-        console.log("datos ", balance);
-        setUsdtBalance(balance);
-        getMaticBalance();
-      }).catch(err => {
-        console.error("Error obteniendo balance: ", err);
-      });
-    }).catch(err => {
-      console.error("Error obteniendo contrato: ", err);
-    });
-  };
-
-
-  const getMaticBalance = async () => {
+  const getUsdtBalance = async (walletAddr: string) => {
+    if (!walletAddr) {
+      console.error("No hay dirección de wallet");
+      return;
+    }
+  
+    console.log("Obteniendo balance de la wallet:", walletAddr);
+  
     try {
-      if (usdtBalance == null) {
-        const apiKey = import.meta.env.VITE_POLYGONSCAN_API_KEY; // Carga la API key del archivo .env
+      const contract = await getcontractUsdt();
+      const balance = await contract.balanceOf(walletAddr);
+      console.log("Balance de USDT:", balance);
+      setUsdtBalance(balance);
+      getMaticBalance(balance);
+    } catch (err) {
+      console.error("Error obteniendo balance:", err);
+    }
+  };
+  
+
+
+  const getMaticBalance = async (usdtBalance:Number) => {
+    try {
+      console.log("Iniciando getMaticBalance...");
+  
+      if (usdtBalance != null) {
+  
+        const apiKey = import.meta.env.VITE_POLYGONSCAN_API_KEY;
+  
         const url = `https://api.polygonscan.com/api?module=account&action=balance&address=${walletAddress}&apikey=${apiKey}`;
-
+ 
+  
         const response = await fetch(url);
+     
+  
         const data = await response.json();
-
+     
+  
         if (data.status === "1") {
           const balanceWei = data.result;
+      
+  
           const balanceMatic = balanceWei / 1e18;
-          console.log("Balance de MATIC en wei:", balanceMatic);
+    
+  
           setMaticBalance(balanceMatic);
           return balanceMatic;
         } else {
           console.error("Error en la respuesta de Polygonscan:", data.message);
         }
+      } else {
+        console.log("usdtBalance no es null, se omite la consulta.");
       }
     } catch (error) {
       console.error("Error al consultar balance en Polygonscan:", error);
     }
   };
+  
 
   const approveTokenFrontend = async () => {
     const usdtAddress = import.meta.env.VITE_USDT_ADDRESS;
@@ -163,19 +197,17 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
     const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
     const contract = new ethers.Contract(contractAddress, abiContract, signer);
     console.log("var", balanceInfo, usdtDecimals, loading)
-    const amountToApprove = (tsh * 1e6) + 1;
-
+    const amountToApprove = (tsh * 1e6);
+console.log("amountToApprove", amountToApprove)
     const params = {
       cantidadTokens: amountToBuy,
       wallet: walletAddress,
     }
     try {
 
-      console.log("Balance de MATIC:", maticBalance);
       if (typeof maticBalance === "number" && !isNaN(maticBalance) && maticBalance > 1) {
         console.log("Iniciando la aprobación de tokens...");
         const txApprove = await tokenUsdt.approve(contractAddress, amountToApprove);
-        console.log("Transacción enviada para approve:", txApprove.hash);
 
         // Esperar la confirmación de la transacción de aprobación
         const receiptApprove = await txApprove.wait();
@@ -185,7 +217,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
         console.log("Realizando la compra...");
         const compra = await buyTokens(params); // los datos calculo
         const payments = compra.costo;
-
+console.log("payments", payments)
         // Paso 3: Distribuir USDT
         console.log("Distribuyendo USDT...");
         const txDistribute = await contract.distributeUSDT(payments);
@@ -196,8 +228,11 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
         console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
 
         alert("Transacción completada con éxito");
-        let register = await registerWallet(walletAddress, referido);
+        if (walletAddress) {
+          let register = await registerWallet(walletAddress, referido);
         buyer(register.tokensComprados);
+        }
+       
       } else {
         alert("No tienes suficiente MATIC para realizar la transacción");
       }
@@ -294,7 +329,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
                         <a
                           className={`text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold transition-all cursor-pointer 
                           ${tsh > 0 ? 'hover:bg-black hover:text-teal-400' : 'bg-gray-400 text-gray-600 cursor-not-allowed'}`}
-                          onClick={tsh > 0.5 ? approveTokenFrontend : undefined}
+                          onClick={tsh > 0 ? approveTokenFrontend : undefined}
                         >
                           Comprar tsh
                         </a>
