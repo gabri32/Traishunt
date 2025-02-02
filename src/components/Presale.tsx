@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import CountdownSm from './CountdownSm';
 import { checkBalance, checkAvaliable, registerWallet, buyTokens,verifyref } from "../services/api";
-import { stringify } from "querystring";
+//import { stringify } from "querystring";
 
 
 interface Props {
@@ -20,7 +20,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [pernow, setPernow] = useState<number>(Number); // Almacenar porcentaje
   const [boughtTsh, buyer] = useState<number>(Number);
   const [amountPos, SetAmountPos] = useState<number>(); // Almacenar el total de tokens por fase
-  const [usdtBalance, setUsdtBalance] = useState<number | null>(null); // Almacenar el saldo de USDT
+  const [usdtBalance, setUsdtBalance] = useState<number | 0>(0); // Almacenar el saldo de USDT
   const [maticBalance, setMaticBalance] = useState<number | null>(null); // Almacenar el saldo de MATIC
   const [amountToBuy, setAmountToBuy] = useState<number>(0); // Cantidad que el usuario quiere comprar
   const usdtDecimals = 6; // USDT tiene 6 decimales en la mayoría de las redes
@@ -28,7 +28,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [balanceInfo, setBalanceInfo] = useState(null); // Estado para almacenar el resultado de la API
   const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
   const [error, setError] = useState(false); // Estado para manejar errores
-  let accounts: string;
+  //let accounts: string;
    const [tieneref, setTieneref] = useState(false);
   const [referido, setReferido] = useState(''); // Variable de estado
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,60 +187,64 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   
 
   const approveTokenFrontend = async () => {
-    const usdtAddress = import.meta.env.VITE_USDT_ADDRESS;
-    const abiUsdt = VITE_ABI_USDT;
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []); // Pide permiso al usuario
-    const signer = await provider.getSigner();
-    const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
-    const abiContract = VITE_CONTRACT_ABI;
-    const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
-    const contract = new ethers.Contract(contractAddress, abiContract, signer);
-    console.log("var", balanceInfo, usdtDecimals, loading)
-    const amountToApprove = (tsh * 1e6);
-console.log("amountToApprove", amountToApprove)
-    const params = {
-      cantidadTokens: amountToBuy,
-      wallet: walletAddress,
-    }
-    try {
-
-      if (typeof maticBalance === "number" && !isNaN(maticBalance) && maticBalance > 1) {
-        console.log("Iniciando la aprobación de tokens...");
-        const txApprove = await tokenUsdt.approve(contractAddress, amountToApprove);
-
-        // Esperar la confirmación de la transacción de aprobación
-        const receiptApprove = await txApprove.wait();
-        console.log("Transacción confirmada para approve:", receiptApprove);
-
-        // Paso 2: Realizar la compra para obtener los datos de payments
-        console.log("Realizando la compra...");
-        const compra = await buyTokens(params); // los datos calculo
-        const payments = compra.costo;
-console.log("payments", payments)
-        // Paso 3: Distribuir USDT
-        console.log("Distribuyendo USDT...");
-        const txDistribute = await contract.distributeUSDT(payments);
-        console.log("Transacción enviada para distributeUSDT:", txDistribute.hash);
-
-        // Esperar la confirmación de la transacción de distribución
-        const receiptDistribute = await txDistribute.wait();
-        console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
-
-        alert("Transacción completada con éxito");
-        if (walletAddress) {
-          let register = await registerWallet(walletAddress, referido);
-        buyer(register.tokensComprados);
-        }
-       
-      } else {
-        alert("No tienes suficiente MATIC para realizar la transacción");
+    if(usdtBalance>0){
+      const usdtAddress = import.meta.env.VITE_USDT_ADDRESS;
+      const abiUsdt = VITE_ABI_USDT;
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []); // Pide permiso al usuario
+      const signer = await provider.getSigner();
+      const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+      const abiContract = VITE_CONTRACT_ABI;
+      const tokenUsdt = new ethers.Contract(usdtAddress, abiUsdt, signer);
+      const contract = new ethers.Contract(contractAddress, abiContract, signer);
+      console.log("var", balanceInfo, usdtDecimals, loading)
+      const amountToApprove = (tsh * 1e6);
+  console.log("amountToApprove", amountToApprove)
+      const params = {
+        cantidadTokens: amountToBuy,
+        wallet: walletAddress,
       }
-      // Paso 1: Aprobar tokens
-
-    } catch (error) {
-      console.error("Error en el flujo de ejecución:", error);
+      try {
+  
+        if (typeof maticBalance === "number" && !isNaN(maticBalance) && maticBalance > 1) {
+          console.log("Iniciando la aprobación de tokens...");
+          const txApprove = await tokenUsdt.approve(contractAddress, amountToApprove);
+  
+          // Esperar la confirmación de la transacción de aprobación
+          const receiptApprove = await txApprove.wait();
+          console.log("Transacción confirmada para approve:", receiptApprove);
+  
+          // Paso 2: Realizar la compra para obtener los datos de payments
+          console.log("Realizando la compra...");
+          const compra = await buyTokens(params); // los datos calculo
+          const payments = compra.costo;
+  console.log("payments", payments)
+          // Paso 3: Distribuir USDT
+          console.log("Distribuyendo USDT...");
+          const txDistribute = await contract.distributeUSDT(payments);
+          console.log("Transacción enviada para distributeUSDT:", txDistribute.hash);
+  
+          // Esperar la confirmación de la transacción de distribución
+          const receiptDistribute = await txDistribute.wait();
+          console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
+  
+          alert("Transacción completada con éxito");
+          if (walletAddress) {
+            let register = await registerWallet(walletAddress, referido);
+          buyer(register.tokensComprados);
+          }
+         
+        } else {
+          alert("No tienes suficiente MATIC para realizar la transacción");
+        }
+      } catch (error) {
+        console.error("Error en el flujo de ejecución:", error);
+      }
+        // Paso 1: Aprobar tokens
     }
+  
+
+  
   };
 
 
