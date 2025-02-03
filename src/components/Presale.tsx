@@ -70,13 +70,18 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
     }
   };
   useEffect(() => {
+    console.log("referido",referido);
     checkAvaliable().then((res) => {
      const collected = res.cantidadDisponible.tokensDisponibles;
       percentage = ((collected / total) * 100);
       setCollected(collected);
       const calculatedPernow = parseFloat((100 - percentage).toFixed(2));
       setPernow(calculatedPernow);
-
+      const params = new URLSearchParams(window.location.search);
+      const referidoUrl = params.get('referido');  // Obtener el valor del parámetro 'referido'
+      if (referidoUrl) {
+        setReferido(referidoUrl);  // Establecer el valor en el estado
+      }
       SetAmountPos(parseFloat(Number(res.cantidadDisponible.precioactual).toFixed(2)));
     });
   }, []);
@@ -101,8 +106,8 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
         return;
       }
   
-      let nuevoReferido = referido || "";  // Si hay un referido en el estado, lo usamos
-  
+      let nuevoReferido = referido ;  // Si hay un referido en el estado, lo usamos
+  console.log("nuevoReferido",nuevoReferido);
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
   
       if (accounts.length === 0) {
