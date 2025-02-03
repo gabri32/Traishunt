@@ -14,6 +14,16 @@ export const checkBalance = async (amount:number) => {
     throw error;
   }
 };
+export const confirmarCompra = async (params:object) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/preventa/confirmarcompra`,{ params });
+  
+    return response.data;
+  } catch (error) {
+    console.error("Error al verificar el saldo:", error);
+    throw error;
+  }
+};
 export const verifyref = async (ref:string) => {
   try {
     const response = await axios.get(`${API_URL}/api/preventa/verifyref?ref=`+ref);
@@ -24,6 +34,9 @@ export const verifyref = async (ref:string) => {
     throw error;
   }
 };
+
+
+
 export const checkAvaliable = async () => {
   try {
     const response = await axios.get(`${API_URL}/api/preventa/disponiblesPorFase`);
