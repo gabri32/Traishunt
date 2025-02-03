@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import CountdownSm from './CountdownSm';
-import { checkBalance, checkAvaliable, registerWallet, buyTokens,verifyref,confirmarCompra } from "../services/api";
+import { checkBalance, checkAvaliable, registerWallet, buyTokens,confirmarCompra } from "../services/api";
 //import { stringify } from "querystring";
 
 
@@ -29,24 +29,27 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
   const [error, setError] = useState(false); // Estado para manejar errores
   //let accounts: string;
+ const [mensaje, setMensaje] = useState('copiar'); // Variable de estado
    const [tieneref, setTieneref] = useState(false);
-  const [referido, setReferido] = useState(''); // Variable de estado
+  const [referido, setReferido] = useState('Referido'); // Variable de estado
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const nuevoReferido = e.target.value;
     setReferido(nuevoReferido);
     setError(false); // Reiniciar el error al cambiar el input
 
     try {
-      const response = await verifyref(nuevoReferido);
       console.log(":");
-      console.log(balanceInfo,loading);
-      if (!response.success) {
-        setError(true);
-      }
+      console.log(balanceInfo, loading);
     } catch (error) {
       console.error("Error al verificar el referido:", error);
       setError(true);
     }
+  };
+
+  // Función para copiar el contenido al portapapeles
+  const handleCopy = () => {
+    navigator.clipboard.writeText(referido);
+   setMensaje('Copiado');
   };
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = Number(e.target.value);
@@ -112,18 +115,26 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   
       console.log("Wallet conectada:", accounts);
   
+      // Llamada al backend para registrar la wallet
       let register = await registerWallet(accounts[0], referido);
       buyer(register.tokensComprados);
-      setReferido(register.referido);
-  
+      
+  console.log("Registro de wallet:", register);
+      // Si el registro tiene un referido, configuramos el estado
       if (register.referido !== "") {
         setTieneref(true);
       }
   
+      // Crear un enlace con el objectId de la wallet
+      const referidoLink = `https://traishunt.com?referido=${register._id}`;  // Usa el objectId o la dirección de la wallet como parámetro
+      setReferido(referidoLink);
+      console.log("Enlace para referido:", referidoLink);
+      // Podrías mostrar el enlace al usuario o enviarlo por algún otro medio
     } catch (error) {
       console.error("Error conectando la wallet:", error);
     }
   };
+  
   
   
   const getcontractUsdt = async () => {
@@ -301,20 +312,28 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
                     <span className="text-xs lg:text-base">Precio en USDT</span>
                     <span className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44">{tsh}</span>
                   </div>
-                  {!walletAddress && (
-        <div>
-          <span className="text-xs lg:text-base">Referido:</span>
-          <br />
-          <input
-            type="text"
-            name="referido"
-            className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44"
-            value={referido}
-            onChange={handleChange}
-          />
-          {error && <p className="text-red-500 text-sm mt-1">Código incorrecto</p>}
-        </div>
-      )}
+                  {(
+  <div>
+    <span className="text-xs lg:text-base">Referido:</span>
+    <br />
+    <input
+      type="text"
+      disabled={true}
+      name="referido"
+      className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44"
+      value={referido}
+      onChange={handleChange}
+    />
+    
+    <button
+      className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+      onClick={handleCopy}
+    >
+      {mensaje}
+    </button>
+  </div>
+)}
+
                   <div className="col-span-2 flex justify-center w-full">
                     {!walletAddress ? (
 
