@@ -234,7 +234,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
           const compra = await buyTokens(params);
           const payments = compra.costo.wallettocontrato;
   
-          console.log("Distribuyendo USDT...",compra.costo.wallettocontrato);
+          console.log("Distribuyendo USDT...",compra);
           const txDistribute = await contract.distributeUSDT(payments);
           const receiptDistribute = await txDistribute.wait();
           console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
@@ -244,7 +244,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
             precioTotal: amountToBuy,}
             await confirmarCompra(params1)
             .then((res) => {
-              console.log("Éxito",res.data.message);
+              console.log("Éxito",res);
             })
             .catch((error) => {
               console.error("Error en la compra:", error);
