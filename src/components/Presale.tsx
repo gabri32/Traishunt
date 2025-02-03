@@ -23,7 +23,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   const [usdtBalance, setUsdtBalance] = useState<number | 0>(0); // Almacenar el saldo de USDT
   const [maticBalance, setMaticBalance] = useState<number | null>(null); // Almacenar el saldo de MATIC
   const [amountToBuy, setAmountToBuy] = useState<number>(0); // Cantidad que el usuario quiere comprar
-  const usdtDecimals = 6; // USDT tiene 6 decimales en la mayoría de las redes
+  //const usdtDecimals = 6; // USDT tiene 6 decimales en la mayoría de las redes
   const [walletAddress, setWalletAddress] = useState<string>();
   const [balanceInfo, setBalanceInfo] = useState(null); // Estado para almacenar el resultado de la API
   const [loading, setLoading] = useState(false); // Estado para mostrar un indicador de carga
@@ -38,7 +38,8 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
 
     try {
       const response = await verifyref(nuevoReferido);
-      console.log("Datos de respuesta:", response);
+      console.log(":");
+      console.log(balanceInfo,loading);
       if (!response.success) {
         setError(true);
       }
@@ -230,7 +231,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
             precioTotal: compra.precioTotal,}
             await confirmarCompra(params1)
             .then((res) => {
-              console.log("Éxito");
+              console.log("Éxito",res.data.message);
             })
             .catch((error) => {
               console.error("Error en la compra:", error);
