@@ -107,7 +107,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
       }
   
       let nuevoReferido = referido ;  // Si hay un referido en el estado, lo usamos
-  console.log("nuevoReferido",nuevoReferido);
+
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
   
       if (accounts.length === 0) {
@@ -119,7 +119,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   
       // Llamada al backend para registrar la wallet
       let register = await registerWallet(accounts[0], nuevoReferido);
-      console.log("Registro de wallet:", register);
+     
       buyer(register.tokensComprados);
       // Si el registro tiene un referido, configuramos el estado
       if (register.referido !== "") {
@@ -153,12 +153,11 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
       return;
     }
   
-    console.log("Obteniendo balance de la wallet:", walletAddr);
   
     try {
       const contract = await getcontractUsdt();
       const balance = await contract.balanceOf(walletAddr);
-      console.log("Balance de USDT:", balance);
+ 
       setUsdtBalance(balance);
       getMaticBalance(balance);
     } catch (err) {

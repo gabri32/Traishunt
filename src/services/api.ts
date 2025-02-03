@@ -40,7 +40,7 @@ export const verifyref = async (ref:string) => {
 export const checkAvaliable = async () => {
   try {
     const response = await axios.get(`${API_URL}/api/preventa/disponiblesPorFase`);
-    console.log("datos de respuesta fase",response.data);  
+      
     return response.data;
   } catch (error) {
     console.error("Error al verificar el saldo:", error);
