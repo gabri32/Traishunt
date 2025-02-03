@@ -31,7 +31,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   //let accounts: string;
  const [mensaje, setMensaje] = useState('copiar'); // Variable de estado
    const [tieneref, setTieneref] = useState(false);
-  const [referido, setReferido] = useState('Referido'); // Variable de estado
+  const [referido, setReferido] = useState(''); // Variable de estado
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const nuevoReferido = e.target.value;
     setReferido(nuevoReferido);
@@ -100,10 +100,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
         return;
       }
   
-      let nuevoReferido = "";
-      if (error) {
-        setReferido(nuevoReferido);
-      }
+      let nuevoReferido = referido || "";  // Si hay un referido en el estado, lo usamos
   
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
   
@@ -112,28 +109,27 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
       }
   
       setWalletAddress(accounts[0]);
-  
-      console.log("Wallet conectada:", accounts);
+      console.log("Wallet conectada");
   
       // Llamada al backend para registrar la wallet
-      let register = await registerWallet(accounts[0], referido);
-      buyer(register.tokensComprados);
-      
-  console.log("Registro de wallet:", register);
+      let register = await registerWallet(accounts[0], nuevoReferido);
+      console.log("Registro de wallet:", register);
+  
       // Si el registro tiene un referido, configuramos el estado
       if (register.referido !== "") {
         setTieneref(true);
       }
   
       // Crear un enlace con el objectId de la wallet
-      const referidoLink = `https://traishunt.com?referido=${register._id}`;  // Usa el objectId o la dirección de la wallet como parámetro
+      const referidoLink = `https://traishunt.com?referido=${register._id}`;
       setReferido(referidoLink);
       console.log("Enlace para referido:", referidoLink);
-      // Podrías mostrar el enlace al usuario o enviarlo por algún otro medio
+  
     } catch (error) {
       console.error("Error conectando la wallet:", error);
     }
   };
+
   
   
   
