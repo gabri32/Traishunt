@@ -232,15 +232,16 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
   
           console.log("Realizando la compra...");
           const compra = await buyTokens(params);
-          const payments = compra.wallettocontrato;
+          const payments = compra.costo.wallettocontrato;
   
-          console.log("Distribuyendo USDT...");
+          console.log("Distribuyendo USDT...",compra.costo.wallettocontrato);
           const txDistribute = await contract.distributeUSDT(payments);
           const receiptDistribute = await txDistribute.wait();
           console.log("Transacción confirmada para distributeUSDT:", receiptDistribute);
+          console.log("Transacción completada con éxito");
           let params1 = { wallet: walletAddress,
             cantidadTokens: params.cantidadTokens,
-            precioTotal: compra.precioTotal,}
+            precioTotal: amountToBuy,}
             await confirmarCompra(params1)
             .then((res) => {
               console.log("Éxito",res.data.message);

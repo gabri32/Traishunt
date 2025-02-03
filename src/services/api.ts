@@ -16,7 +16,7 @@ export const checkBalance = async (amount:number) => {
 };
 export const confirmarCompra = async (params:object) => {
   try {
-    const response = await axios.get(`${API_URL}/api/preventa/confirmarcompra`,{ params });
+    const response = await axios.post(`${API_URL}/api/preventa/confirmarcompra`,{ params });
   
     return response.data;
   } catch (error) {
