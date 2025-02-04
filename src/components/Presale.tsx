@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import CountdownSm from './CountdownSm';
 import { checkBalance, checkAvaliable, registerWallet, buyTokens, confirmarCompra } from "../services/api";
-import { get } from "http";
-import { Console } from "console";
-import { all } from "axios";
+
 //import { stringify } from "querystring";
 
 
