@@ -34,11 +34,11 @@ const Component: React.FC<Props> = ({ title, text }: Props) => {
           }
         >
           <p className="overflow-hidden">
-            <div className="p-2 leading-4">
+            <span className="p-2 leading-4">
               <span className="text-xs lg:text-base xl:text-lg font-light">
                 {text}
               </span>
-            </div>
+            </span>
           </p>
         </div>
       </div>

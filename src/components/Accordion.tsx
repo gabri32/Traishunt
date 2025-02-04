@@ -36,13 +36,13 @@ const Component: React.FC<Props> = ({ title, subtitle, text }: Props) => {
           }
         >
           <p className="overflow-hidden  text-white">
-            <div className="lg:py-7">
+            <span className="lg:py-7">
               <span className="text-sm lg:text-base xl:text-lg color-main font-bold">Objetivo</span>
               <br />
               <span className="text-sm lg:text-base xl:text-lg font-light">
                 {text}
               </span>
-            </div>
+            </span>
           </p>
         </div>
       </div>
