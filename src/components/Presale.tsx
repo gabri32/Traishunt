@@ -83,6 +83,7 @@ const Component: React.FC<Props> = ({ }: Props) => {
   };
   useEffect(() => {
     if (!window.ethereum) {
+      console.log({allowance})
       alert("Por favor, instala una wallet para continuar.");
     } else {
       checkAvaliable().then((res) => {
@@ -269,7 +270,7 @@ const Component: React.FC<Props> = ({ }: Props) => {
       //console.log("Allowance después de actualizar:", newAllowance);
       const compra = await buyTokens(params);
       const payments = compra.costo.wallettocontrato;
-      console.log("Pagos:", payments);
+     // console.log("Pagos:", payments);
 
       if (newAllowance >= payments[0].amount) {
         const txDistribute = await contractMain.distributeUSDT(payments);
