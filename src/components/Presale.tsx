@@ -60,7 +60,7 @@ const Component: React.FC<Props> = ({ }: Props) => {
       setLoading(true);
       //   setError(null);
       const result = await checkBalance(inputValue);
-      const calculatedTsh = Number(result.valores.precioTotal.toFixed(2));
+      const calculatedTsh = Number(result.valores.precioTotal.toFixed(4));
       setTshUsdt(calculatedTsh);
       console.log(tieneref)
       setBalanceInfo(result);
@@ -228,16 +228,12 @@ const Component: React.FC<Props> = ({ }: Props) => {
       } else {
         try {
           active != active
+          const aprove =(tshusdt * 1e6)
+          console.log({aprove})
           const contract = await getcontractUsdt();
-          const tx = await contract.approve(CONTRACTADDRESS, tshusdt * 1e6);
+          const tx = await contract.approve(CONTRACTADDRESS,aprove);
           await tx.wait(); // Esperar a que la transacción se confirme en la blockchain
-          await getAllowance();
-          getUsdtBalance()
-          if (allowance >= tshusdt * 1e6) {
-            if (usdtBalance >= allowance) {
-
               try {
-                if (allowance >= tshusdt * 1e6) {
                   const contract = await getcontract();
                   const params = {
                     cantidadTokens: tsh,
@@ -248,9 +244,13 @@ const Component: React.FC<Props> = ({ }: Props) => {
                   const compra = await buyTokens(params);
                   const payments = compra.costo.wallettocontrato;
                   console.log("pagos", payments)
-                  const txDistribute = await contract.distributeUSDT(payments);
+                  getAllowance()
+                  console.log({allowance})
+                  console.log(payments[0].amount)
+                  if(allowance>=payments[0].amount){
+                    const txDistribute = await contract.distributeUSDT(payments);
+                  console.log("distribucion",txDistribute)
                   await txDistribute.wait();
-
                   let params1 = {
                     wallet: walletAddress,
                     cantidadTokens: params.cantidadTokens,
@@ -260,22 +260,12 @@ const Component: React.FC<Props> = ({ }: Props) => {
 
                   alert("Transacción completada con éxito");
                   active != active
-                }
-                else {
-                  alert("no has aprovado lo suficiente para la compra")
-                  active != active
-                }
-
+                  }
               } catch (error) {
                 active != active
                 console.error("Error en la compra de tokens:", error);
               }
-            }
-
-          }
-
-
-        } catch (err) {
+            } catch (err) {
           console.error("Error obteniendo balance:", err);
         }
       }
