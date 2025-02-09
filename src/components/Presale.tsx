@@ -244,8 +244,9 @@ const Component: React.FC<Props> = ({ }: Props) => {
                   const compra = await buyTokens(params);
                   const payments = compra.costo.wallettocontrato;
                   console.log("pagos", payments)
-                  getAllowance()
-                  console.log({allowance})
+                 const aprobado = await getAllowance()
+                 console.log("aprbado",aprobado)
+                  console.log("datos a aprobacion",{allowance})
                   console.log(payments[0].amount)
                   if(allowance>=payments[0].amount){
                     const txDistribute = await contract.distributeUSDT(payments);
