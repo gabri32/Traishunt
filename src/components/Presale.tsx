@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { checkBalance, checkAvaliable, registerWallet, buyTokens, confirmarCompra } from "../services/api";
-import { get } from "node:http";
-import { all } from "axios";
+// import { get } from "node:http";
+// import { all } from "axios";
 
 //import { stringify } from "querystring";
 
