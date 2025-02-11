@@ -16,7 +16,7 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
     getInitials()
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expired, showSeconds])
+  }, [expired])
 
   const getInitials = async () => {   
     const finish = new Date(expired).getTime()
@@ -24,14 +24,14 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
       const now = new Date().getTime()
       const distance = (finish - now) / 1000
       if(distance > 0) {
-        const days = Math.floor(distance / 60 / 60 / 24)
-        const hours = Math.floor(distance / 60 / 60 % 24)
-        const minutes = Math.floor((distance / 60) % 60)
-        const seconds = Math.floor(distance % 60)
-        setDays(days)
-        setHours(hours)
-        setMinutes(minutes)
-        setSeconds(seconds)
+        // const days = Math.floor(distance / 60 / 60 / 24)
+        // const hours = Math.floor(distance / 60 / 60 % 24)
+        // const minutes = Math.floor((distance / 60) % 60)
+        // const seconds = Math.floor(distance % 60)
+        // setDays(days)
+        // setHours(hours)
+        // setMinutes(minutes)
+        // setSeconds(seconds)
       } else {
         clearInterval(timerId)
       }
@@ -59,12 +59,12 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
             {/* <span className="text-5xl lg:text-8xl italic font-extralight">{minutes}</span>
             <span className="text-xs lg:text-lg font-light  color-main uppercase text-start">Min</span> */}
           </div>
-          {showSeconds == true && 
+          {/* {showSeconds == true && 
             <div className="flex flex-col justify-center text-center transition-all">
               <span className="text-5xl lg:text-8xl italic font-extralight">{seconds}</span>
               <span className="text-xs lg:text-lg font-light  color-main uppercase text-start">Seg</span>
             </div>
-          }
+          } */}
         </div>
         <div className="grid w-full gap-4 lg:gap-9  rounded-b-2xl p-5 sm:p-16 lg:px-8 bg-card shadow-xl z-10">
           <h2 className="text-center color-main font-protest text-3xl lg:text-6xl xl:text-7xl">Bienvenidos a Traishunt (dex)</h2>
