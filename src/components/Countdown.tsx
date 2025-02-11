@@ -44,21 +44,20 @@ const Component: React.FC<Props> = ({ expired }: Props) => {
       <div className="grid container mx-auto justify-center lg:mt-[-19vh] py-7 px-5 lg:px-24 xl:px-36 relative z-30">
         <div
           className="flex w-full justify-center gap-2 lg:gap-5 group relative overflow-hidden rounded-t-2xl p-4 sm:p-5 text-white bg-[#060C18] transition-all"
-          onMouseOver={() => {setShowSeconds(true)}}
-          onMouseOut={() => {setShowSeconds(false)}}
-
-        >
+          // onMouseOver={() => {setShowSeconds(true)}}
+          // onMouseOut={() => {setShowSeconds(false)}}
+           >
           <div className="flex flex-col justify-center text-center">
-            <span className="text-5xl lg:text-8xl italic font-extralight">{days}.</span>
-            <span className="text-xs lg:text-lg font-light color-main uppercase text-start">Días</span>
+            {/* <span className="text-5xl lg:text-8xl italic font-extralight">{days}.</span>
+            <span className="text-xs lg:text-lg font-light color-main uppercase text-start">Días</span> */}
           </div>
           <div className="flex flex-col justify-center text-center">
-            <span className="text-5xl lg:text-8xl italic font-extralight">{hours}.</span>
-            <span className="text-xs lg:text-lg font-light  color-main uppercase text-start">Horas</span>
+            {/* <span className="text-5xl lg:text-8xl italic font-extralight">{hours}.</span>
+            <span className="text-xs lg:text-lg font-light  color-main uppercase text-start">Horas</span> */}
           </div>
           <div className="flex flex-col justify-center text-center">
-            <span className="text-5xl lg:text-8xl italic font-extralight">{minutes}</span>
-            <span className="text-xs lg:text-lg font-light  color-main uppercase text-start">Min</span>
+            {/* <span className="text-5xl lg:text-8xl italic font-extralight">{minutes}</span>
+            <span className="text-xs lg:text-lg font-light  color-main uppercase text-start">Min</span> */}
           </div>
           {showSeconds == true && 
             <div className="flex flex-col justify-center text-center transition-all">
