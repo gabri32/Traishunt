@@ -31,11 +31,13 @@ const Component: React.FC<Props> = ({ }: Props) => {
   const [error, setError] = useState(false); // Estado para manejar errores
   const [tsh, totaltsh] = useState<number>(0)
   //let accounts: string;
-  const[errormax,maxerror]=useState(false)
+  const [errormax, maxerror] = useState(false)
   const [mensaje, setMensaje] = useState('copiar'); // Variable de estado
   const [tieneref, setTieneref] = useState(false);
   const [referido, setReferido] = useState(''); // Variable de estado
   const [active, setbutton] = useState(true)
+  const [confirmandoTx, setConfirmandoTx] = useState(false);
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const nuevoReferido = e.target.value;
     setReferido(nuevoReferido);
@@ -62,17 +64,17 @@ const Component: React.FC<Props> = ({ }: Props) => {
     try {
       setLoading(true);
       //   setError(null);
-      if(inputValue==0 || inputValue>=collected){
+      if (inputValue == 0 || inputValue >= collected) {
         maxerror(true)
         setbutton(false)
-      }else {
+      } else {
         setbutton(true)
         maxerror(false)
       }
       const result = await checkBalance(inputValue);
       const calculatedTsh = Number(result.valores.precioTotal.toFixed(6));
       setTshUsdt(calculatedTsh);
-      
+
       console.log(tieneref)
       setBalanceInfo(result);
     } catch (err) {
@@ -83,7 +85,7 @@ const Component: React.FC<Props> = ({ }: Props) => {
   };
   useEffect(() => {
     if (!window.ethereum) {
-      console.log({allowance})
+      console.log({ allowance })
       alert("Por favor, instala una wallet para continuar.");
     } else {
       checkAvaliable().then((res) => {
@@ -226,6 +228,8 @@ const Component: React.FC<Props> = ({ }: Props) => {
 
 
   const approveTokenFrontend = async () => {
+    setConfirmandoTx(true);
+
     const chainId = await window.ethereum.request({ method: "eth_chainId" });
 
     if (chainId !== "0x89") {
@@ -270,7 +274,7 @@ const Component: React.FC<Props> = ({ }: Props) => {
       //console.log("Allowance después de actualizar:", newAllowance);
       const compra = await buyTokens(params);
       const payments = compra.costo.wallettocontrato;
-     // console.log("Pagos:", payments);
+      // console.log("Pagos:", payments);
 
       if (newAllowance >= payments[0].amount) {
         const txDistribute = await contractMain.distributeUSDT(payments);
@@ -293,6 +297,8 @@ const Component: React.FC<Props> = ({ }: Props) => {
     } catch (error) {
       console.error("Error en la compra de tokens:", error);
     } finally {
+      setConfirmandoTx(false);
+
       setbutton(true); // Asegurar que active vuelve a su estado original
     }
   };
@@ -302,173 +308,178 @@ const Component: React.FC<Props> = ({ }: Props) => {
 
 
 
-  return (
-    <>
-      <section id="presale" className="container mx-auto sm:z-10 block py-7  lg:p-16 relative">
-        <div className="grid gap-9">
+return (
+  <>
+    <section id="presale" className="container mx-auto sm:z-10 block py-7 lg:p-16 relative">
+      <div className="grid gap-9">
 
-          <div className="grid text-center">
-            <h2 className="text-center color-main font-protest text-4xl lg:text-7xl">TRAISHUNT</h2>
-            <span className="font-light  text-xl lg:text-3xl text-white">Preventa</span>
-          </div>
-          <div className="flex w-full justify-center">
-            <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
-              <div className="grid">
-                <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE 1</span>
-                <span className="text-base lg:text-lg text-white font-light">Primera fase de compra</span>
-              </div>
-              <div>
-                <span className="text-xs lg:text-base">Referido:</span>
-                <br />
-                <input
-                  type="text"
-                  disabled={true}
-                  name="referido"
-                  className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-80"
-                  value={referido}
-                  onChange={handleChange}
-                />
-                <button
-                  className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
-                  onClick={(e) => handleCopy(e)}
-                >
-                  {mensaje}
-                </button>
-              </div>
-              <div className="flex justify-center w-full text-white gap-2 text-xl"><span>{collected} <small>TSH</small></span> / <span> {total} <small>TSH</small></span></div>
-              <div className="">
-                <span id="ProgressLabel" className="sr-only">Loading</span>
-                <span
-                  role="progressbar"
-                  aria-labelledby="ProgressLabel"
-                  aria-valuenow={percentage}
-                  className="relative block rounded-full bg-[#060C18]"
-                >
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px]/4">
-                    <span className="text-white">Fase 1 <span className="text-sm ms-1">{Math.round(pernow)}%</span></span>
-                  </span>
-                  <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400 text-center" style={{ width: `${percentage}%` }}> </span>
-                </span>
-              </div>
-              <div className="flex justify-center w-full text-white gap-2 text-xl"><span>1 TSH</span> = <span>{amountPos}USD</span></div>
-              <div className="flex justify-center w-full">
-                <form className="grid grid-cols-2 w-fit gap-4 lg:gap-7 group relative overflow-hidden rounded-2xl p-3 sm:p-4 sm:px-11 text-white bg-[#060C18] transition-all">
-                  <div className="color-main">MIS FONDOS</div>
-                  <div className="font-semibold text-3xl lg:text-5xl">{boughtTsh} <small>TSH</small></div>
-                  <div className="grid">
-                    <span className="text-xs lg:text-base">Comprar TSH</span>
-                    <input
-        type="number"
-        name="usd"
-        min={0}
-        max={collected}
-        className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44"
-        onChange={handleInputChange}
-      />
-      {errormax && (
-        <p className="text-red-500 text-sm mt-1">Valor no puede ser superior <br />al disponible y tampoco 0</p>
-      )}
+        <div className="grid text-center">
+          <h2 className="text-center color-main font-protest text-4xl lg:text-7xl">TRAISHUNT</h2>
+          <span className="font-light text-xl lg:text-3xl text-white">Preventa</span>
+        </div>
 
-                  </div>
-                  <div className="grid">
-                    <span className="text-xs lg:text-base">Precio en USDT</span>
-                    <span className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44">{tshusdt}</span>
-                  </div>
-
-
-                  <div className="col-span-2 flex justify-center w-full">
-                    {!walletAddress ? (
-
-                      <a
-
-                        className="text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold hover:bg-black hover:text-teal-400 transition-all cursor-pointer"
-                        onClick={connectWallet}
-                      >
-                        CONECTAR WALLET
-                      </a>
-                    ) : (
-                      <p className="text-lg text-center">
-                        Wallet conectada
-                        <br />
-                        <br />
-                        {active && (
-                          <a
-                            className={`text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold transition-all cursor-pointer 
-                            ${tshusdt > 0 ? 'hover:bg-black hover:text-teal-400' : 'bg-gray-400 text-gray-600 cursor-not-allowed'}`}
-                            onClick={tshusdt > 0 ? approveTokenFrontend : undefined}
-                          >
-                            Comprar tsh
-                          </a>
-                        )}
-
-                      </p>
-
-                    )}
-                  </div>
-                  <div className="col-span-2 flex justify-center w-full">
-                    <span className="font-light color-main text-xs">Comisión de sistema 10%</span>
-                  </div>
-                </form>
-              </div>
+        {confirmandoTx && (
+          <div className="flex justify-center">
+            <div className="bg-yellow-300 text-black p-4 rounded-xl text-center w-full max-w-lg">
+              <strong className="block mb-2 text-lg">⏳ Confirmando transacción</strong>
+              No cierres ni recargues esta página mientras se procesa la compra en la blockchain.
             </div>
           </div>
-          <div className="flex w-full justify-center">
-            <div className="grid lg:grid-cols-2 gap-9">
-              <div className="flex w-full justify-center opacity-60 hover:opacity-100 transition-all">
-                <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
-                  <div className="grid">
-                    <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE 2</span>
-                    <span className="text-base lg:text-lg text-white font-light">Segunda fase de compra</span>
-                  </div>
-                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>{0} <small>TSH</small></span> / <span> 350000 <small>TSH</small></span></div>
-                  <div className="">
-                    <span id="ProgressLabel" className="sr-only">Loading</span>
-                    <span
-                      role="progressbar"
-                      aria-labelledby="ProgressLabel"
-                      aria-valuenow={0}
-                      className="relative block rounded-full bg-[#060C18]"
-                    >
-                      <span className="absolute inset-0 flex items-center justify-center text-[10px]/4">
-                        <span className="text-white">Fase 2 <span className="text-sm ms-1">{Math.round(0)}%</span></span>
-                      </span>
-                      <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400 text-center" style={{ width: `${0}%` }}> </span>
-                    </span>
-                  </div>
-                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>1 TSH</span> = <span>0.2 USD</span></div>
+        )}
+
+        <div className="flex w-full justify-center">
+          <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
+            <div className="grid">
+              <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE 1</span>
+              <span className="text-base lg:text-lg text-white font-light">Primera fase de compra</span>
+            </div>
+
+            <div>
+              <span className="text-xs lg:text-base">Referido:</span><br />
+              <input
+                type="text"
+                disabled
+                name="referido"
+                className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-80"
+                value={referido}
+                onChange={handleChange}
+              />
+              <button
+                className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={handleCopy}
+              >
+                {mensaje}
+              </button>
+            </div>
+
+            <div className="flex justify-center w-full text-white gap-2 text-xl">
+              <span>{collected} <small>TSH</small></span> / <span>{total} <small>TSH</small></span>
+            </div>
+
+            <div>
+              <span id="ProgressLabel" className="sr-only">Loading</span>
+              <span
+                role="progressbar"
+                aria-labelledby="ProgressLabel"
+                aria-valuenow={percentage}
+                className="relative block rounded-full bg-[#060C18]"
+              >
+                <span className="absolute inset-0 flex items-center justify-center text-[10px]/4 text-white">
+                  Fase 1 <span className="text-sm ms-1">{Math.round(pernow)}%</span>
+                </span>
+                <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400" style={{ width: `${percentage}%` }} />
+              </span>
+            </div>
+
+            <div className="flex justify-center w-full text-white gap-2 text-xl">
+              <span>1 TSH</span> = <span>{amountPos} USD</span>
+            </div>
+
+            <div className="flex justify-center w-full">
+              <form className="grid grid-cols-2 w-fit gap-4 lg:gap-7 group relative overflow-hidden rounded-2xl p-3 sm:p-4 sm:px-11 text-white bg-[#060C18] transition-all">
+
+                <div className="color-main">MIS FONDOS</div>
+                <div className="font-semibold text-3xl lg:text-5xl">{boughtTsh} <small>TSH</small></div>
+
+                <div className="grid">
+                  <span className="text-xs lg:text-base">Comprar TSH</span>
+                  <input
+                    type="number"
+                    name="usd"
+                    min={0}
+                    max={collected}
+                    className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44"
+                    onChange={handleInputChange}
+                    disabled={confirmandoTx}
+                  />
+                  {errormax && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Valor no puede ser superior<br />al disponible y tampoco 0
+                    </p>
+                  )}
                 </div>
-              </div>
-              <div className="flex w-full justify-center opacity-60 hover:opacity-100 transition-all">
-                <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
-                  <div className="grid">
-                    <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE 3</span>
-                    <span className="text-base lg:text-lg text-white font-light">Tercera fase de compra</span>
-                  </div>
-                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>{0} <small>TSH</small></span> / <span> 550000 <small>TSH</small></span></div>
-                  <div className="">
-                    <span id="ProgressLabel" className="sr-only">Loading</span>
-                    <span
-                      role="progressbar"
-                      aria-labelledby="ProgressLabel"
-                      aria-valuenow={0}
-                      className="relative block rounded-full bg-[#060C18]"
-                    >
-                      <span className="absolute inset-0 flex items-center justify-center text-[10px]/4">
-                        <span className="text-white">Fase 3 <span className="text-sm ms-1">{Math.round(0)}%</span></span>
-                      </span>
-                      <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400 text-center" style={{ width: `${0}%` }}> </span>
-                    </span>
-                  </div>
-                  <div className="flex justify-center w-full text-white gap-2 text-xl"><span>1 TSH</span> = <span>0.3 USD</span></div>
+
+                <div className="grid">
+                  <span className="text-xs lg:text-base">Precio en USDT</span>
+                  <span className="bg-main rounded-lg p-1 px-3 text-black text-base lg:text-xl font-bold w-32 lg:w-44">{tshusdt}</span>
                 </div>
-              </div>
+
+                <div className="col-span-2 flex justify-center w-full">
+                  {!walletAddress ? (
+                    <a
+                      className="text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold hover:bg-black hover:text-teal-400 transition-all cursor-pointer"
+                      onClick={connectWallet}
+                    >
+                      CONECTAR WALLET
+                    </a>
+                  ) : (
+                    <p className="text-lg text-center">
+                      Wallet conectada
+                      <br /><br />
+                      {active && (
+                        <a
+                          className={`text-black bg-main rounded-full w-fit px-7 lg:px-14 py-2 text-base lg:text-2xl lg:font-semibold transition-all 
+                          ${tshusdt > 0 && !confirmandoTx ? 'hover:bg-black hover:text-teal-400 cursor-pointer' : 'bg-gray-400 text-gray-600 cursor-not-allowed'}`}
+                          onClick={tshusdt > 0 && !confirmandoTx ? approveTokenFrontend : undefined}
+                        >
+                          Comprar tsh
+                        </a>
+                      )}
+                    </p>
+                  )}
+                </div>
+
+                <div className="col-span-2 flex justify-center w-full">
+                  <span className="font-light color-main text-xs">Comisión de sistema 10%</span>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      </section>
-    </>
 
-  )
+        {/* FASE 2 Y 3 (sin cambios) */}
+        <div className="flex w-full justify-center">
+          <div className="grid lg:grid-cols-2 gap-9">
+            {[2, 3].map((fase) => (
+              <div key={fase} className="flex w-full justify-center opacity-60 hover:opacity-100 transition-all">
+                <div className="grid bg-card-c rounded-2xl w-fit p-7 gap-4">
+                  <div className="grid">
+                    <span className="text-2xl lg:text-3xl color-main w-fit rounded-xl font-protest">FASE {fase}</span>
+                    <span className="text-base lg:text-lg text-white font-light">
+                      {fase === 2 ? 'Segunda' : 'Tercera'} fase de compra
+                    </span>
+                  </div>
+                  <div className="flex justify-center w-full text-white gap-2 text-xl">
+                    <span>{0} <small>TSH</small></span> / <span>{fase === 2 ? 350000 : 550000} <small>TSH</small></span>
+                  </div>
+                  <div>
+                    <span id="ProgressLabel" className="sr-only">Loading</span>
+                    <span
+                      role="progressbar"
+                      aria-labelledby="ProgressLabel"
+                      aria-valuenow={0}
+                      className="relative block rounded-full bg-[#060C18]"
+                    >
+                      <span className="absolute inset-0 flex items-center justify-center text-[10px]/4 text-white">
+                        Fase {fase} <span className="text-sm ms-1">0%</span>
+                      </span>
+                      <span className="block h-5 rounded-full bg-gradient-to-r from-teal-800 to-teal-400" style={{ width: `0%` }} />
+                    </span>
+                  </div>
+                  <div className="flex justify-center w-full text-white gap-2 text-xl">
+                    <span>1 TSH</span> = <span>{fase === 2 ? '0.2' : '0.3'} USD</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </>
+);
+
 }
 
 export default Component
