@@ -205,26 +205,18 @@ const Component: React.FC<Props> = ({ }: Props) => {
 
 
   const getMaticBalance = async () => {
-    try {
-      console.log("Iniciando getMaticBalance...");
-      const apiKey = import.meta.env.VITE_POLYGONSCAN_API_KEY;
-      const url = `https://api.polygonscan.com/api?module=account&action=balance&address=${walletAddress}&apikey=${apiKey}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.status === "1") {
-        const balanceWei = data.result;
-        const balanceMatic = balanceWei / 1e18;
-        console.log({ balanceMatic })
-        setMaticBalance(balanceMatic);
-      } else {
-        console.error("Error en la respuesta de Polygonscan:", data.message);
-      }
+  try {
+    if (!walletAddress) return;
+    const provider = new ethers.BrowserProvider(window.ethereum); // Usa MetaMask
+    const balanceWei = await provider.getBalance(walletAddress); // Devuelve BigInt
+    const balanceMatic = parseFloat(ethers.formatEther(balanceWei)); // Lo convierte a MATIC
+    setMaticBalance(balanceMatic); // Lo guarda en el estado
+    console.log("MATIC balance:", balanceMatic);
+  } catch (error) {
+    console.error("Error al obtener el balance de MATIC:", error);
+  }
+};
 
-
-    } catch (error) {
-      console.error("Error al consultar balance en Polygonscan:", error);
-    }
-  };
 
 
   const approveTokenFrontend = async () => {
